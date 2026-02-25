@@ -213,7 +213,15 @@ uv run python -m processing.build_vector_db
    ```
 5. Deploy!
 
+### Docker
 
+```dockerfile
+FROM python:3.14-slim
+WORKDIR /app
+COPY . .
+RUN pip install uv && uv sync
+EXPOSE 8501
+CMD ["uv", "run", "streamlit", "run", "app.py", "--server.address", "0.0.0.0"]
 ```
 
 ```bash
