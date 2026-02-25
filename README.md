@@ -120,13 +120,17 @@ Open your browser at `http://localhost:8501`.
 2. Click **Reset Token** and copy it immediately
 3. Save this as `DISCORD_BOT_TOKEN` in your `.env` file
 
-### Step 3: Enable Message Content Intent (CRITICAL)
+### Step 3: Enable Message Content Intent (CRITICAL ⚠️)
 
-Without this step, the bot cannot read message text.
+> **Without this step, the bot will connect but return EMPTY messages!**
+
+Discord requires explicit approval for bots to read message text. This is a privacy protection.
 
 1. On the **Bot** page, scroll to **Privileged Gateway Intents**
-2. Enable **Message Content Intent**
+2. Enable **Message Content Intent** (toggle it ON - it should turn green)
 3. Click **Save Changes**
+
+If you skip this step, `fetch_discord.py` will return 0 messages even though the bot is connected.
 
 ### Step 4: Invite the Bot to Your Server
 
