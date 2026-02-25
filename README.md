@@ -6,7 +6,7 @@
 <p align="center"><strong>Project Communication Intelligence</strong></p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Python-3.14+-blue?style=for-the-badge&logo=python&logoColor=white" alt="Python">
+  <img src="https://img.shields.io/badge/Python-3.13+-blue?style=for-the-badge&logo=python&logoColor=white" alt="Python">
   <img src="https://img.shields.io/badge/LangChain-RAG-green?style=for-the-badge" alt="LangChain">
   <img src="https://img.shields.io/badge/Streamlit-Frontend-red?style=for-the-badge&logo=streamlit&logoColor=white" alt="Streamlit">
   <img src="https://img.shields.io/badge/FAISS-Vector%20DB-yellow?style=for-the-badge" alt="FAISS">
@@ -55,7 +55,7 @@ Built for teams managing complex technical projects where critical decisions, co
 
 ## 📋 Prerequisites
 
-- **Python 3.14+**
+- **Python 3.13+**
 - **[uv](https://docs.astral.sh/uv/)** — Fast Python package manager (recommended)
 - **Groq API Key** — Free tier available at [console.groq.com](https://console.groq.com)
 - **Discord Bot Token** — For fetching channel messages
@@ -213,15 +213,7 @@ uv run python -m processing.build_vector_db
    ```
 5. Deploy!
 
-### Docker
 
-```dockerfile
-FROM python:3.14-slim
-WORKDIR /app
-COPY . .
-RUN pip install uv && uv sync
-EXPOSE 8501
-CMD ["uv", "run", "streamlit", "run", "app.py", "--server.address", "0.0.0.0"]
 ```
 
 ```bash
