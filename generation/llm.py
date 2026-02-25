@@ -1,0 +1,105 @@
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning, module="pydantic")
+warnings.filterwarnings("ignore", category=UserWarning, module="langchain_core")
+
+import os
+from dotenv import load_dotenv, find_dotenv
+from langchain_groq import ChatGroq
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_community.vectorstores import FAISS
+
+# Load environment variables
+load_dotenv(find_dotenv())
+
+# Cached instances (lazy initialization)
+_llm = None
+_retriever = None
+_embeddings = None
+_vectorstore = None
+
+def get_llm():
+    """Get or create the LLM instance."""
+    global _llm
+    if _llm is None:
+        api_key = os.getenv("GROQ_API_KEY")
+        if not api_key:
+            raise ValueError("GROQ_API_KEY is not set. Please check your .env file.")
+        _llm = ChatGroq(
+            model_name="llama-3.3-70b-versatile",
+            temperature=0.2,
+            api_key=api_key
+        )
+    return _llm
+
+def get_retriever(k: int = 5):
+    """Get or create the FAISS retriever."""
+    global _retriever, _embeddings, _vectorstore
+    if _retriever is None:
+        _embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+        db_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'faiss_db')
+        _vectorstore = FAISS.load_local(db_path, _embeddings, allow_dangerous_deserialization=True)
+        _retriever = _vectorstore.as_retriever(search_kwargs={"k": k})
+    return _retriever
+
+def get_prompt():
+    """Get the prompt template."""
+    return ChatPromptTemplate.from_messages([
+        ("system", """You are a helpful AI assistant managing a machine learning project. 
+Use the following relevant communication logs to answer the user's questions.
+Include specific details from the messages when possible.
+
+Relevant Context:
+{context}"""),
+        ("human", "{question}")
+    ])
+
+def retrieve_context(question: str, k: int = 5):
+    """Retrieve relevant documents and return them with formatted context."""
+    retriever = get_retriever(k)
+    docs = retriever.invoke(question)
+    
+    context_parts = []
+    for doc in docs:
+        meta = doc.metadata
+        context_parts.append(
+            f"[{meta.get('timestamp', 'Unknown')}] {meta.get('author', 'Unknown')} via {meta.get('source', 'Unknown')}:\n{doc.page_content}"
+        )
+    context_string = "\n\n".join(context_parts)
+    
+    return docs, context_string
+
+def ask_question(question: str) -> str:
+    """Ask a question and get an answer using RAG."""
+    docs, context_string = retrieve_context(question)
+    
+    chain = get_prompt() | get_llm()
+    response = chain.invoke({
+        "context": context_string,
+        "question": question
+    })
+    
+    return response.content
+
+# 5. Interactive Q&A loop
+if __name__ == "__main__":
+    print("=" * 50)
+    print("Project Assistant (RAG-powered)")
+    print("Ask questions about the project. Type 'quit' to exit.")
+    print("=" * 50)
+    
+    while True:
+        question = input("\nYour question: ").strip()
+        
+        if question.lower() in ['quit', 'exit', 'q']:
+            print("Goodbye!")
+            break
+        
+        if not question:
+            print("Please enter a question.")
+            continue
+        
+        print("\nSearching relevant context and thinking...\n")
+        answer = ask_question(question)
+        print("Answer:")
+        print(answer)
