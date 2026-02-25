@@ -2,9 +2,8 @@ import warnings
 warnings.filterwarnings("ignore", category=UserWarning, module="pydantic")
 warnings.filterwarnings("ignore", category=UserWarning, module="langchain_core")
 
+import os
 import streamlit as st
-from generation import ask_question, retrieve_context
-from generation import llm as llm_module
 
 # Page config
 st.set_page_config(
@@ -16,7 +15,11 @@ st.set_page_config(
 st.title("🔬 Project Assistant")
 st.caption("Ask questions about the YOLO-Seg lab equipment dataset project")
 
-# Sidebar (moved to top so sync happens before chat)
+# Check if database exists
+DB_PATH = os.path.join(os.path.dirname(__file__), 'data', 'faiss_db', 'index.faiss')
+db_exists = os.path.exists(DB_PATH)
+
+# Sidebar
 with st.sidebar:
     st.header("🔄 Data Sync")
     
@@ -32,12 +35,9 @@ with st.sidebar:
                     from processing import build_vector_database
                     doc_count = build_vector_database()
                     
-                    # Invalidate the cached retriever so it reloads
-                    llm_module._retriever = None
-                    llm_module._vectorstore = None
-                    
                     st.success(f"Vector database rebuilt with {doc_count} documents!")
-                    st.info("The assistant will now use the latest data.")
+                    st.info("The assistant is now ready. Please refresh the page.")
+                    st.rerun()
                     
             except Exception as e:
                 st.error(f"Error: {e}")
@@ -56,6 +56,24 @@ with st.sidebar:
     if st.button("🗑️ Clear Chat History", use_container_width=True):
         st.session_state.messages = []
         st.rerun()
+
+# Show setup message if database doesn't exist
+if not db_exists:
+    st.warning("⚠️ **First Time Setup Required**")
+    st.info("""
+    The vector database has not been initialized yet.
+    
+    👈 Click **"Fetch Latest Discord Messages"** in the sidebar to:
+    1. Pull messages from your Discord channel
+    2. Build the searchable knowledge base
+    
+    Once complete, you can start asking questions!
+    """)
+    st.stop()
+
+# Import generation module only after confirming DB exists
+from generation import ask_question, retrieve_context
+from generation import llm as llm_module
 
 # Initialize chat history
 if "messages" not in st.session_state:
