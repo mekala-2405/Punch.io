@@ -262,12 +262,36 @@ function Messages({ messages }) {
 }
 
 /* ---------- App shell ---------- */
+const TAB_PATHS = { chat: "ask", timeline: "timeline", messages: "messages" };
+
+function getInitialTab() {
+  const path = window.location.pathname.replace(/^\/+/, "");
+  return TAB_PATHS[path] || "ask";
+}
+
 export default function App() {
   const [creds, setCreds] = useState(load);
   const [synced, setSynced] = useState(false);
-  const [tab, setTab] = useState("ask");
+  const [tab, setTab] = useState(getInitialTab);
   const [turns, setTurns] = useState([]);
   const [refreshKey, setRefreshKey] = useState(0);
+
+  useEffect(() => {
+    const onPop = () => {
+      const path = window.location.pathname.replace(/^\/+/, "");
+      const t = TAB_PATHS[path];
+      if (t) setTab(t);
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  const navigate = (id) => {
+    setTab(id);
+    const url = id === "ask" ? "/chat" : "/" + id;
+    window.history.pushState(null, "", url);
+  };
+
   const messages = useJSON("/data/messages.json", [refreshKey]);
   const timeline = useJSON("/data/timeline.json", [refreshKey]);
   const meta = useJSON("/data/meta.json", [refreshKey]);
@@ -283,7 +307,7 @@ export default function App() {
         <div className="wordmark">Punch<span>.io</span></div>
         <nav>
           {nav.map(([id, label]) => (
-            <button key={id} className={`nav-item ${tab === id ? "on" : ""}`} onClick={() => setTab(id)}>{label}</button>
+            <button key={id} className={`nav-item ${tab === id ? "on" : ""}`} onClick={() => navigate(id)}>{label}</button>
           ))}
         </nav>
         <div className="side-foot">

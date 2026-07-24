@@ -155,23 +155,31 @@ def render_onboarding():
     st.markdown("**Credentials**")
 
     with st.form("creds"):
-        token = st.text_input("Bot token", type="password",
+        token = st.text_input("Discord bot token", type="password",
                               value=os.getenv("DISCORD_BOT_TOKEN", ""))
-        guild = st.text_input("Server ID",
+        guild = st.text_input("Server ID (optional)",
                              value=os.getenv("DISCORD_GUILD_ID", ""),
                              help="Right-click your server icon > Copy Server ID "
-                                  "(enable Developer Mode in Discord settings first).")
+                                  "(enable Developer Mode in Discord settings first). "
+                                  "Leave blank to auto-discover all servers.")
+        groq_key = st.text_input("Groq API key", type="password",
+                                value=os.getenv("GROQ_API_KEY", ""),
+                                help="Required for Q&A. Get one at https://console.groq.com/keys")
         submitted = st.form_submit_button("Connect", type="primary")
 
     if submitted:
         if not token:
-            st.error("Bot token is required.")
+            st.error("Discord bot token is required.")
+            return
+        if not groq_key:
+            st.error("Groq API key is required.")
             return
         ok, msg = _validate_token(token)
         if ok:
             os.environ["DISCORD_BOT_TOKEN"] = token
             if guild:
                 os.environ["DISCORD_GUILD_ID"] = guild
+            os.environ["GROQ_API_KEY"] = groq_key
             st.session_state["onboarded"] = True
             st.session_state["force_onboard"] = False
             st.success(f"Connected as {msg}.")
@@ -617,12 +625,23 @@ def main():
     elif selected is not None:
         messages = _load_messages(project=selected)
 
-    tab_ask, tab_msgs, tab_timeline = st.tabs(["Ask", "Messages", "Timeline"])
-    with tab_ask:
+    TAB_ROUTES = {"chat": "ask", "timeline": "timeline", "messages": "messages"}
+    tab_param = st.query_params.get("tab", "chat")
+    tab = TAB_ROUTES.get(tab_param, "ask")
+    nav_items = [("chat", "Ask"), ("timeline", "Timeline"), ("messages", "Messages")]
+    cols = st.columns(len(nav_items))
+    for i, (param, label) in enumerate(nav_items):
+        with cols[i]:
+            if st.button(label, use_container_width=True,
+                         type="primary" if tab_param == param else "secondary"):
+                st.query_params.tab = param
+                st.rerun()
+
+    if tab == "ask":
         render_chat(messages)
-    with tab_msgs:
+    elif tab == "messages":
         render_messages(messages)
-    with tab_timeline:
+    elif tab == "timeline":
         render_timeline_tab(messages)
 
 
