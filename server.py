@@ -42,6 +42,9 @@ def onboard(req: OnboardRequest):
     DATA_DIR.mkdir(exist_ok=True)
     db_path = str(DATA_DIR / "punch.db")
 
+    from core import store as _store
+    _store.init_db(db_path)
+
     # Sync all discoverable channels
     try:
         from sync import discover_discord_connectors, build_connector

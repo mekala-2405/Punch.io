@@ -5,12 +5,6 @@ build/
 dist/
 wheels/
 *.egg-info
-*.swp
-*.swo
-*.kate-swp
-
-# JavaScript / frontend deps
-node_modules/
 
 # Virtual environments
 .venv/
@@ -20,7 +14,6 @@ node_modules/
 
 # Generated data (user-specific)
 data/
-frontend/public/data/
 
 # Testing
 .pytest_cache/
@@ -46,4 +39,6 @@ orchestration/
 Thumbs.db
 
 # Misc
-capture_shots.cjs
+node_modules/
+
+
