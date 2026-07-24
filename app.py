@@ -29,32 +29,66 @@ st.set_page_config(page_title="Punch.io", page_icon="🥊", layout="wide")
 
 st.markdown("""
 <style>
-    /* Impeccable-style: sharp, dark, no slop */
     .main > div { padding: 1rem 2rem; }
     .stApp { background: #0a0a0c; }
     .stApp header { background: #0a0a0c !important; }
-    h1, h2, h3 { font-weight: 500; letter-spacing: -0.02em; }
-    .stTabs [data-baseweb="tab-list"] { gap: 0; border-bottom: 1px solid #1e1e22; }
-    .stTabs [data-baseweb="tab"] { 
-        font-size: 0.85rem; font-weight: 400; letter-spacing: 0.01em;
-        text-transform: uppercase; padding: 0.6rem 1rem;
-    }
-    .stTabs [aria-selected="true"] { color: #e0e0e0; }
-    .stButton button { font-weight: 400; border-radius: 0; }
-    .stButton button[kind="primary"] { background: #e0e0e0; color: #0a0a0c; }
-    .stMetric { background: transparent; border: 1px solid #1e1e22; padding: 0.8rem; }
-    .stSelectbox, .stMultiselect { font-size: 0.8rem; }
-    .stSelectbox > div, .stMultiselect > div { border-radius: 0; border-color: #1e1e22; }
-    .st-spinner { color: #666; }
-    .element-container .stAlert { background: transparent; border: 1px solid #1e1e22; border-radius: 0; }
-    .stChatMessage { background: transparent; }
-    .stChatInput { border-radius: 0; border-color: #1e1e22; }
-    section[data-testid="stSidebar"] { background: #0a0a0c; border-right: 1px solid #1e1e22; }
-    section[data-testid="stSidebar"] .stButton button { width: 100%; text-align: left; border: none; border-bottom: 1px solid #1e1e22; background: transparent; border-radius: 0; padding: 0.6rem 0; color: #999; }
+    h1, h2, h3 { font-weight: 500; letter-spacing: -0.02em; color: #e0e0e0; }
+    p, li, .stMarkdown { color: #b0b0b0; }
+
+    /* sidebar */
+    section[data-testid="stSidebar"] { background: #0d0d10; border-right: 1px solid #1a1a1e; }
+    section[data-testid="stSidebar"] .stButton button { width: 100%; text-align: left; border: none; border-bottom: 1px solid #1a1a1e; background: transparent; border-radius: 0; padding: 0.6rem 0; color: #888; font-size: 0.8rem; }
     section[data-testid="stSidebar"] .stButton button:hover { color: #e0e0e0; background: transparent; }
-    .stProgress > div > div { border-radius: 0; }
-    hr { border-color: #1e1e22; margin: 1.5rem 0; }
-    .stCaption { color: #555; }
+    section[data-testid="stSidebar"] .stMetric { background: transparent; border: 1px solid #1a1a1e; padding: 0.6rem; }
+    section[data-testid="stSidebar"] .stMetric label { color: #666; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    section[data-testid="stSidebar"] .stMetric [data-testid="stMetricValue"] { font-size: 1.2rem; color: #e0e0e0; }
+
+    /* buttons */
+    .stButton button { font-weight: 400; border-radius: 4px; border: 1px solid #1e1e22; background: transparent; color: #aaa; padding: 0.3rem 0.8rem; font-size: 0.8rem; transition: all 0.15s; }
+    .stButton button:hover { border-color: #444; color: #e0e0e0; }
+    .stButton button[kind="primary"] { background: #e0e0e0; color: #0a0a0c; border: none; font-weight: 500; }
+    .stButton button[kind="primary"]:hover { background: #fff; }
+
+    /* nav tabs */
+    .stColumns .stButton button { border: none; border-bottom: 2px solid transparent; border-radius: 0; background: transparent; color: #666; padding: 0.5rem 0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    .stColumns .stButton button[kind="primary"] { border-bottom-color: #e0e0e0; color: #e0e0e0; background: transparent; }
+    .stColumns .stButton button[kind="primary"]:hover { background: transparent; }
+    .stColumns .stButton button:hover { color: #e0e0e0; }
+
+    /* chat */
+    .stChatMessage { background: transparent; padding: 0.5rem 0; }
+    .stChatMessage [data-testid="chatAvatarIcon"] { width: 28px; height: 28px; font-size: 0.7rem; }
+    div[data-testid="chatMessageContent"] { background: #131317; border: 1px solid #1a1a1e; border-radius: 8px; padding: 0.6rem 1rem; font-size: 0.85rem; color: #d0d0d0; }
+    .stChatMessage[data-testid="userChatMessage"] div[data-testid="chatMessageContent"] { background: #1a1a22; }
+    .stChatInput { border-radius: 8px; border-color: #1e1e22; background: #131317; }
+    .stChatInput:focus { border-color: #444; }
+
+    /* inputs */
+    .stSelectbox > div, .stMultiselect > div, .stTextInput > div > input { border-radius: 4px; border-color: #1e1e22; background: #131317; color: #d0d0d0; font-size: 0.8rem; }
+    .stSelectbox > div:focus, .stMultiselect > div:focus, .stTextInput > div > input:focus { border-color: #444; }
+
+    /* metric cards */
+    .stMetric { background: transparent; border: 1px solid #1a1a1e; padding: 0.8rem; border-radius: 4px; }
+    .stMetric label { color: #666; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .stMetric [data-testid="stMetricValue"] { font-size: 1.4rem; color: #e0e0e0; }
+
+    /* alerts / info */
+    .element-container .stAlert { background: #111114; border: 1px solid #1a1a1e; border-radius: 4px; color: #b0b0b0; font-size: 0.85rem; }
+    .element-container .stAlert[data-baseweb="notification"] { background: #111114; }
+
+    /* containers / borders */
+    div[data-testid="stExpander"] { border: 1px solid #1a1a1e; border-radius: 4px; }
+    div.stForm { border: 1px solid #1a1a1e; border-radius: 8px; padding: 1.5rem; background: #0d0d10; }
+
+    /* progress */
+    .stProgress > div > div { border-radius: 2px; }
+    .stProgress > div { background: #1a1a1e; }
+
+    /* misc */
+    hr { border-color: #1a1a1e; margin: 1.5rem 0; }
+    .stCaption { color: #555; font-size: 0.75rem; }
+    .st-spinner { color: #666; }
+    div[data-testid="stNotification"] { background: #111114; border: 1px solid #1a1a1e; border-radius: 4px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -146,10 +180,12 @@ def render_onboarding():
         ),
     ]
 
-    for title, body in steps:
+    for i, (title, body) in enumerate(steps):
         with st.container(border=True):
-            st.markdown(f"**{title}**")
-            st.markdown(body)
+            cols = st.columns([1, 10])
+            cols[0].markdown(f"<span style='color:#555;font-size:0.65rem;font-weight:600'>{i+1:02d}</span>", unsafe_allow_html=True)
+            cols[1].markdown(f"**{title}**")
+            cols[1].markdown(body)
 
     st.divider()
     st.markdown("**Credentials**")
@@ -479,12 +515,15 @@ def render_timeline_tab(messages):
     st.caption(f"{len(shown)} of {len(events)} events")
 
     for e in shown:
-        st.markdown(
-            f"**{e['type']}** · {e['date']}" +
-            (f" · `#{e['channel']}`" if e.get("channel") else "")
-        )
-        st.write(e["summary"])
-        st.divider()
+        with st.container(border=True):
+            type_colors = {"decision": "#4C9BE8", "milestone": "#4CAF50", "blocker": "#E85454", "resolution": "#FFA726"}
+            c = type_colors.get(e["type"], "#888")
+            hdr = f"<span style='color:{c};font-weight:600;text-transform:uppercase;font-size:0.7rem;letter-spacing:0.04em'>{e['type']}</span>"
+            hdr += f" <span style='color:#666;font-size:0.75rem'>{e['date']}</span>"
+            if e.get("channel"):
+                hdr += f" <span style='color:#555;font-size:0.7rem'>#{e['channel']}</span>"
+            st.markdown(hdr, unsafe_allow_html=True)
+            st.markdown(e["summary"])
 
 
 # --- main views --------------------------------------------------------------
@@ -597,9 +636,12 @@ def render_messages(messages):
     st.caption(f"{len(shown)} of {len(messages)} messages")
 
     for m in shown:
-        st.markdown(f"**{m.author}** · `{m.channel}` · {(m.timestamp or '')[:16]}")
-        st.write(m.content)
-        st.divider()
+        with st.container(border=True):
+            cols = st.columns([1, 4, 2])
+            cols[0].markdown(f"**{m.author}**", help=m.source if m.source else None)
+            cols[1].markdown(f"<span style='color:#888;font-size:0.75rem'>#{m.channel}</span>", unsafe_allow_html=True)
+            cols[2].markdown(f"<span style='color:#555;font-size:0.7rem;float:right'>{(m.timestamp or '')[:16]}</span>", unsafe_allow_html=True)
+            st.markdown(m.content)
 
 
 def main():
