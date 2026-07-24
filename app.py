@@ -266,7 +266,7 @@ def render_channel_setup():
                 bot_token=token,
             )
             try:
-                summary = sync_source(connector)
+                summary = sync_source(connector, db_path=DB_PATH, faiss_dir=os.path.join(DATA_DIR, "faiss_db"))
                 results[ch["name"]] = f"received {summary['received']}, new {summary['new']}"
             except Exception as e:
                 results[ch["name"]] = f"error: {e}"
@@ -527,7 +527,7 @@ def render_sidebar(messages):
                         bot_token=token,
                     )
                     try:
-                        sync_source(connector)
+                        sync_source(connector, db_path=DB_PATH, faiss_dir=os.path.join(DATA_DIR, "faiss_db"))
                     except Exception as e:
                         st.error(f"#{ch['name']}: {e}")
                 _rebuild_index()
@@ -603,19 +603,20 @@ def render_messages(messages):
 
 
 def main():
-    store.init_db(DB_PATH)
-
     if st.session_state.get("force_onboard"):
         render_onboarding()
         return
 
     if not st.session_state.get("onboarded"):
         if _db_ready():
+            store.init_db(DB_PATH)
             st.session_state.onboarded = True
             st.session_state.channels_setup = True
         else:
             render_onboarding()
             return
+
+    store.init_db(DB_PATH)
 
     if not st.session_state.get("channels_setup"):
         render_channel_setup()
