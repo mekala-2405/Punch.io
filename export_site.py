@@ -122,7 +122,11 @@ def main():
     with open(os.path.join(OUT_DIR, "meta.json"), "w", encoding="utf-8") as f:
         json.dump(meta, f, ensure_ascii=False, indent=2)
 
-    print(f"\nWrote {OUT_DIR}/  (messages, meta)")
+    events = extract_timeline(messages)
+    with open(os.path.join(OUT_DIR, "timeline.json"), "w", encoding="utf-8") as f:
+        json.dump(events, f, ensure_ascii=False, indent=2)
+
+    print(f"\nWrote {OUT_DIR}/  (messages, meta, timeline)")
 
 
 if __name__ == "__main__":

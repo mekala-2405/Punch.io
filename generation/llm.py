@@ -90,13 +90,14 @@ def ask_question(question: str, history: list[dict] | None = None) -> str:
     
     if history:
         from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
-        msgs = [SystemMessage(content=get_prompt().messages[0][1])]
+        sys_template = get_prompt().messages[0][1]
+        msgs = [SystemMessage(content=sys_template.replace("{context}", context_string))]
         for h in history[:-1]:
             if h["role"] == "user":
                 msgs.append(HumanMessage(content=h["text"]))
             else:
                 msgs.append(AIMessage(content=h["text"]))
-        msgs.append(HumanMessage(content=f"Message log:\n{context_string}\n\nQuestion: {question}"))
+        msgs.append(HumanMessage(content=question))
         response = get_llm().invoke(msgs)
     else:
         chain = get_prompt() | get_llm()

@@ -42,19 +42,20 @@ def onboard(req: OnboardRequest):
 
     DATA_DIR.mkdir(exist_ok=True)
     db_path = str(DATA_DIR / "punch.db")
+    faiss_dir = str(DATA_DIR / "faiss_db")
 
     from core import store as _store
     _store.init_db(db_path)
 
     # Sync all discoverable channels
     try:
-        from sync import discover_discord_connectors, build_connector
+        from sync import discover_discord_connectors
         from ingest.pipeline import sync_source
         connectors = discover_discord_connectors(req.discord_token)
         results = {}
         for c in connectors:
             try:
-                r = sync_source(c, db_path=db_path)
+                r = sync_source(c, db_path=db_path, faiss_dir=faiss_dir)
                 results[c.source_id] = r
             except Exception as e:
                 results[getattr(c, "source_id", c.name)] = {"error": str(e)}

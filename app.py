@@ -547,8 +547,9 @@ def render_chat(messages):
             st.markdown(q)
         with st.chat_message("assistant"):
             with st.spinner("Searching communications…"):
+                history = [{"role": r, "text": c} for r, c in st.session_state.chat[:-1]]
                 docs, _ = retrieve_context(q)
-                answer = ask_question(q)
+                answer = ask_question(q, history=history)
                 st.markdown(answer)
                 with st.expander(f"{len(docs)} source messages"):
                     for d in docs:
