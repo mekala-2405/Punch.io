@@ -1,0 +1,32 @@
+[
+  {
+    "message_id": "<msg-1@example.com>",
+    "from": "Alice <alice@example.com>",
+    "subject": "Deploy plan",
+    "date": "Mon, 15 Jan 2024 09:30:00 +0000",
+    "body": "We ship Friday.",
+    "in_reply_to": null,
+    "references": [],
+    "folder": "INBOX"
+  },
+  {
+    "message_id": "<msg-2@example.com>",
+    "from": "Bob <bob@example.com>",
+    "subject": "Re: Deploy plan",
+    "date": "Mon, 15 Jan 2024 11:00:00 +0100",
+    "body": "Sounds good.",
+    "in_reply_to": "<msg-1@example.com>",
+    "references": ["<msg-1@example.com>"],
+    "folder": "INBOX"
+  },
+  {
+    "message_id": "",
+    "from": "noreply@example.com",
+    "subject": "no id, must be skipped",
+    "date": "Mon, 15 Jan 2024 12:00:00 +0000",
+    "body": "skip me",
+    "in_reply_to": null,
+    "references": [],
+    "folder": "INBOX"
+  }
+]

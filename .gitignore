@@ -5,6 +5,12 @@ build/
 dist/
 wheels/
 *.egg-info
+*.swp
+*.swo
+*.kate-swp
+
+# JavaScript / frontend deps
+node_modules/
 
 # Virtual environments
 .venv/
@@ -14,10 +20,22 @@ wheels/
 
 # Generated data (user-specific)
 data/
+frontend/public/data/
 
-# Development files
-simulate_discord.py
-Bot_intialization.md
+# Testing
+.pytest_cache/
+
+# Application source is intentionally tracked, including the React frontend,
+# ingestion/sync tools, and embedding pipeline.
+# Keep only local/generated configuration and data below ignored.
+
+# Demo / config data
+conversion.json
+conversations.example.json
+sources.yaml
+
+# Orchestration docs
+orchestration/
 
 # IDE
 .vscode/
@@ -26,3 +44,6 @@ Bot_intialization.md
 # OS
 .DS_Store
 Thumbs.db
+
+# Misc
+capture_shots.cjs

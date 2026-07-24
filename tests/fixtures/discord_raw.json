@@ -1,0 +1,33 @@
+[
+  {
+    "id": "1001",
+    "content": "Kicking off the YOLO-Seg dataset project. Target: 500 labeled images by Friday.",
+    "timestamp": "2024-01-15T09:30:00.000000+00:00",
+    "author": {"username": "alice", "id": "u1"}
+  },
+  {
+    "id": "1002",
+    "content": "I'll handle annotation tooling. Using Roboflow for now.",
+    "timestamp": "2024-01-15T09:45:12.000000+00:00",
+    "author": {"username": "bob", "id": "u2"}
+  },
+  {
+    "id": "1003",
+    "content": "",
+    "timestamp": "2024-01-15T10:00:00.000000+00:00",
+    "author": {"username": "carol", "id": "u3"}
+  },
+  {
+    "id": "1004",
+    "content": "Blocked: GPU quota exceeded on the training box.",
+    "timestamp": "2024-01-16T14:20:00.000000+00:00",
+    "author": {"username": "bob", "id": "u2"},
+    "message_reference": {"message_id": "1001"}
+  },
+  {
+    "id": "1005",
+    "content": "Bumped the quota. Unblocked.",
+    "timestamp": "2024-01-16T15:05:00.000000+00:00",
+    "author": {"username": "alice", "id": "u1"}
+  }
+]

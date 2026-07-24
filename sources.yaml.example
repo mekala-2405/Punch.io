@@ -1,0 +1,44 @@
+# Punch.io multi-source config
+#
+# Copy this to  sources.yaml  and edit. This file holds NON-SECRET identity only
+# (which channels to pull). Tokens stay in .env.
+#
+# Run:  uv run python sync.py            # syncs every source listed here
+#       uv run python sync.py --project apollo   # override the project tag
+#
+# Each source's cursor is tracked independently by its source_id, so adding a new
+# channel here never re-pulls or clobbers the others.
+
+# All ingested messages get tagged with this project (a --project flag overrides it).
+project: apollo
+
+sources:
+  # --- Discord: one entry per channel. channel_id is required to distinguish them. ---
+  # This is the primary, fully-supported source.
+  - type: discord
+    channel: backend          # human label stored on each message
+    channel_id: "111111111"   # the real Discord channel ID (identity + cursor key)
+
+  - type: discord
+    channel: frontend
+    channel_id: "222222222"
+
+  # ---------------------------------------------------------------------------
+  # PREVIEW / UNDER DEVELOPMENT — not recommended for real use yet.
+  # These connectors normalize into the same pipeline, but their live fetch()
+  # is unverified and their credential story is still being finalized. Uncomment
+  # to experiment; expect rough edges.
+  # ---------------------------------------------------------------------------
+  #
+  # Email — will use app passwords / OAuth2, never a raw account password.
+  # - type: email
+  #     mailbox: INBOX
+  #
+  # Forum (Discourse) — requires an admin-issued API key from the forum instance.
+  # - type: forum
+  #     base_url: https://forum.example.com
+  #
+  # Mattermost — Discord-like team chat.
+  # - type: mattermost
+  #     channel: town-square
+  #     channel_id: "abc123def456"
