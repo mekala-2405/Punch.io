@@ -157,11 +157,12 @@ def render_onboarding():
     with st.form("creds"):
         token = st.text_input("Discord bot token", type="password",
                               value=os.getenv("DISCORD_BOT_TOKEN", ""))
-        guild = st.text_input("Server ID (optional)",
+        guild = st.text_input("Server ID (optional — blank auto-discovers all servers)",
                              value=os.getenv("DISCORD_GUILD_ID", ""),
                              help="Right-click your server icon > Copy Server ID "
                                   "(enable Developer Mode in Discord settings first). "
-                                  "Leave blank to auto-discover all servers.")
+                                  "Leave blank to auto-discover channels from every server "
+                                  "the bot can see.")
         groq_key = st.text_input("Groq API key", type="password",
                                 value=os.getenv("GROQ_API_KEY", ""),
                                 help="Required for Q&A. Get one at https://console.groq.com/keys")
@@ -210,9 +211,19 @@ def _discord_get(path: str, token: str):
     return resp.json()
 
 
-def _discover_guild_channels(token: str, guild_id: str) -> list[dict]:
-    channels = _discord_get(f"/guilds/{guild_id}/channels", token)
-    return [c for c in channels if c.get("type") == 0]
+def _discover_guild_channels(token: str, guild_id: str | None = None) -> list[dict]:
+    if guild_id:
+        channels = _discord_get(f"/guilds/{guild_id}/channels", token)
+        return [c for c in channels if c.get("type") == 0]
+    guilds = _discord_get("/users/@me/guilds", token)
+    all_channels = []
+    for g in guilds:
+        try:
+            channels = _discord_get(f"/guilds/{g['id']}/channels", token)
+            all_channels.extend(c for c in channels if c.get("type") == 0)
+        except requests.HTTPError:
+            continue
+    return all_channels
 
 
 def render_channel_setup():
