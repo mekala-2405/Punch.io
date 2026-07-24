@@ -17,9 +17,9 @@ export async function onRequestPost({ request, env }) {
       { status: 500, headers: cors });
   }
 
-  let question;
+  let question, history = [];
   try {
-    ({ question } = await request.json());
+    ({ question, history = [] } = await request.json());
   } catch {
     return new Response(JSON.stringify({ error: "Invalid JSON body" }),
       { status: 400, headers: cors });
@@ -58,19 +58,20 @@ export async function onRequestPost({ request, env }) {
     .map((m) => `[${(m.timestamp || "").slice(0, 10)}] ${m.author} in #${m.channel}: ${m.content}`)
     .join("\n");
 
+  const sysMsg = {
+    role: "system",
+    content:
+      "You answer questions about a software/ML project using ONLY the chat log " +
+      "below. Cite specifics (people, numbers, decisions). If the log doesn't cover " +
+      "it, say so.\n\nChat log:\n" + context,
+  };
+  const historyMsgs = history
+    .filter(h => h.role === "user" || h.role === "assistant")
+    .map(h => ({ role: h.role, content: h.text }));
   const body = {
     model: "llama-3.3-70b-versatile",
     temperature: 0.2,
-    messages: [
-      {
-        role: "system",
-        content:
-          "You answer questions about a software/ML project using ONLY the chat log " +
-          "below. Cite specifics (people, numbers, decisions). If the log doesn't cover " +
-          "it, say so.\n\nChat log:\n" + context,
-      },
-      { role: "user", content: question },
-    ],
+    messages: [sysMsg, ...historyMsgs, { role: "user", content: question }],
   };
 
   const groq = await fetch("https://api.groq.com/openai/v1/chat/completions", {

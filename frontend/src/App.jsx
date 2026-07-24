@@ -6,9 +6,9 @@ const save = (o) => localStorage.setItem(S.CREDS, JSON.stringify(o));
 
 const TYPE_LABEL = { decision: "Decision", milestone: "Milestone", blocker: "Blocker", resolution: "Resolution" };
 
-function useJSON(path) {
+function useJSON(path, deps) {
   const [data, setData] = useState(null);
-  useEffect(() => { fetch(path).then(r => r.ok ? r.json() : null).then(setData).catch(() => {}); }, [path]);
+  useEffect(() => { fetch(path).then(r => r.ok ? r.json() : null).then(setData).catch(() => {}); }, [path, ...(deps || [])]);
   return data;
 }
 
@@ -93,8 +93,7 @@ function Onboarding({ onDone }) {
 }
 
 /* ---------- Chat (Ask) ---------- */
-function Chat({ groqKey, messages }) {
-  const [turns, setTurns] = useState([]); // {role, text, sources?}
+function Chat({ groqKey, messages, turns, setTurns }) {
   const [q, setQ] = useState("");
   const [busy, setBusy] = useState(false);
   const endRef = useRef(null);
@@ -102,12 +101,13 @@ function Chat({ groqKey, messages }) {
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [turns, busy]);
 
   async function ask(question) {
-    setTurns(t => [...t, { role: "user", text: question }]);
+    const updated = [...turns, { role: "user", text: question }];
+    setTurns(updated);
     setBusy(true);
     try {
       let r = await fetch("/api/ask", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question }),
+        body: JSON.stringify({ question, history: updated }),
       });
       if (r.ok) {
         const d = await r.json();
@@ -120,15 +120,17 @@ function Chat({ groqKey, messages }) {
         .map(m => ({ m, s: (m.content || "").toLowerCase().match(/\w+/g)?.filter(w => qw.has(w)).length || 0 }))
         .sort((a, b) => b.s - a.s).slice(0, 20).map(x => x.m);
       const ctx = top.map(m => `[${(m.timestamp || "").slice(0, 10)}] ${m.author} in #${m.channel}: ${m.content}`).join("\n");
+      const msgs = [
+        { role: "system", content: "You are the project-intelligence analyst for a software team. Answer the manager's question ONLY from the message log below. Be specific — name people, dates, numbers, decisions, blockers. If the log doesn't cover it, say so plainly. Lead with the answer.\n\nMessage log:\n" + ctx },
+        ...updated.slice(0, -1).map(t => ({ role: t.role, content: t.text })),
+        { role: "user", content: question },
+      ];
       r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
         headers: { Authorization: `Bearer ${groqKey}`, "Content-Type": "application/json" },
         body: JSON.stringify({
           model: "llama-3.3-70b-versatile", temperature: 0.2,
-          messages: [
-            { role: "system", content: "You are the project-intelligence analyst for a software team. Answer the manager's question ONLY from the message log below. Be specific — name people, dates, numbers, decisions, blockers. If the log doesn't cover it, say so plainly. Lead with the answer.\n\nMessage log:\n" + ctx },
-            { role: "user", content: question },
-          ],
+          messages: msgs,
         }),
       });
       if (!r.ok) throw new Error(`Groq error ${r.status}`);
@@ -263,12 +265,14 @@ export default function App() {
   const [creds, setCreds] = useState(load);
   const [synced, setSynced] = useState(false);
   const [tab, setTab] = useState("ask");
-  const messages = useJSON("/data/messages.json");
-  const timeline = useJSON("/data/timeline.json");
-  const meta = useJSON("/data/meta.json");
+  const [turns, setTurns] = useState([]);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const messages = useJSON("/data/messages.json", [refreshKey]);
+  const timeline = useJSON("/data/timeline.json", [refreshKey]);
+  const meta = useJSON("/data/meta.json", [refreshKey]);
 
   const ready = creds.discord_token && creds.groq_key && (messages || synced);
-  if (!ready) return <Onboarding onDone={() => { setCreds(load()); setSynced(true); }} />;
+  if (!ready) return <Onboarding onDone={() => { setCreds(load()); setSynced(true); setRefreshKey(k => k + 1); }} />;
 
   const nav = [["ask", "Ask"], ["timeline", "Timeline"], ["messages", "Messages"]];
 
@@ -293,7 +297,7 @@ export default function App() {
         </div>
       </aside>
       <main className="content">
-        {tab === "ask" && <Chat groqKey={creds.groq_key} messages={messages} />}
+        {tab === "ask" && <Chat groqKey={creds.groq_key} messages={messages} turns={turns} setTurns={setTurns} />}
         {tab === "timeline" && <Timeline events={timeline} />}
         {tab === "messages" && <Messages messages={messages} />}
       </main>

@@ -580,6 +580,8 @@ def render_messages(messages):
 
 
 def main():
+    store.init_db(DB_PATH)
+
     if st.session_state.get("force_onboard"):
         render_onboarding()
         return

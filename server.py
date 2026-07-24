@@ -28,6 +28,7 @@ class OnboardRequest(BaseModel):
 
 class AskRequest(BaseModel):
     question: str
+    history: list[dict] = []
 
 
 @app.post("/api/onboard")
@@ -98,7 +99,7 @@ def ask(req: AskRequest):
         embed_new(db_path=db_path, faiss_dir=faiss_dir)
         from generation import ask_question, retrieve_context
         docs, _ = retrieve_context(req.question)
-        answer = ask_question(req.question)
+        answer = ask_question(req.question, history=req.history)
         sources = [{"author": d.metadata.get("author"), "channel": d.metadata.get("channel"),
                     "timestamp": d.metadata.get("timestamp"), "content": d.page_content} for d in docs]
         return {"answer": answer, "sources": sources}

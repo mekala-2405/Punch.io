@@ -79,15 +79,29 @@ def retrieve_context(question: str, k: int = 5):
     
     return docs, context_string
 
-def ask_question(question: str) -> str:
-    """Ask a question and get an answer using RAG."""
+def ask_question(question: str, history: list[dict] | None = None) -> str:
+    """Ask a question and get an answer using RAG.
+    
+    history: list of {"role": "user"|"assistant", "text": str} from previous turns.
+    """
     docs, context_string = retrieve_context(question)
     
-    chain = get_prompt() | get_llm()
-    response = chain.invoke({
-        "context": context_string,
-        "question": question
-    })
+    if history:
+        from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
+        msgs = [SystemMessage(content=get_prompt().messages[0][1])]
+        for h in history[:-1]:
+            if h["role"] == "user":
+                msgs.append(HumanMessage(content=h["text"]))
+            else:
+                msgs.append(AIMessage(content=h["text"]))
+        msgs.append(HumanMessage(content=f"Message log:\n{context_string}\n\nQuestion: {question}"))
+        response = get_llm().invoke(msgs)
+    else:
+        chain = get_prompt() | get_llm()
+        response = chain.invoke({
+            "context": context_string,
+            "question": question
+        })
     
     return response.content
 
