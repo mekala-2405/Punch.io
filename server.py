@@ -107,9 +107,9 @@ def ask(req: AskRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# Serve exported data files
-if EXPORT_DIR.exists():
-    app.mount("/data", StaticFiles(directory=str(EXPORT_DIR)), name="data")
+# Serve exported data files — create dir so mount always works
+EXPORT_DIR.mkdir(parents=True, exist_ok=True)
+app.mount("/data", StaticFiles(directory=str(EXPORT_DIR)), name="data")
 
 # Serve React build (must be last)
 DIST = Path(__file__).parent / "frontend" / "dist"
