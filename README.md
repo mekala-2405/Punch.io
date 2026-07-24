@@ -64,7 +64,7 @@ The first sync/build may download the Hugging Face `all-MiniLM-L6-v2` embedding 
 ### 1. Install the project
 
 ```bash
-git clone <your-punch-io-repository-url>
+git clone https://github.com/mekala-2405/Punch.io
 cd Punch.io
 uv sync
 cd frontend
