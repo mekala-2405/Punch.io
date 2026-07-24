@@ -29,7 +29,7 @@ st.set_page_config(page_title="Punch.io", page_icon="🥊", layout="wide")
 
 st.markdown("""
 <style>
-    .main > div { padding: 1rem 2rem; }
+    .main .block-container { max-width: 1200px; padding: 1rem 2rem !important; }
     .stApp { background: #0a0a0c; }
     .stApp header { background: #0a0a0c !important; }
     h1, h2, h3 { font-weight: 500; letter-spacing: -0.02em; color: #e0e0e0; }
