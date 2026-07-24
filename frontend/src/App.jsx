@@ -120,8 +120,9 @@ function Chat({ groqKey, messages, turns, setTurns }) {
         .map(m => ({ m, s: (m.content || "").toLowerCase().match(/\w+/g)?.filter(w => qw.has(w)).length || 0 }))
         .sort((a, b) => b.s - a.s).slice(0, 20).map(x => x.m);
       const ctx = top.map(m => `[${(m.timestamp || "").slice(0, 10)}] ${m.author} in #${m.channel}: ${m.content}`).join("\n");
+      const now = new Date().toISOString().slice(0, 16).replace("T", " ");
       const msgs = [
-        { role: "system", content: "You are the project-intelligence analyst for a software team. Answer the manager's question ONLY from the message log below. Be specific — name people, dates, numbers, decisions, blockers. If the log doesn't cover it, say so plainly. Lead with the answer.\n\nMessage log:\n" + ctx },
+        { role: "system", content: `Today is ${now}. You are the project-intelligence analyst for a software team. Answer the manager's question ONLY from the message log below. Be specific — name people, dates, numbers, decisions, blockers. If the log doesn't cover it, say so plainly. Lead with the answer.\n\nMessage log:\n` + ctx },
         ...updated.slice(0, -1).map(t => ({ role: t.role, content: t.text })),
         { role: "user", content: question },
       ];

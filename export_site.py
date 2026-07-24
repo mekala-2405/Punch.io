@@ -8,6 +8,7 @@ import argparse
 import json
 import os
 import re
+from datetime import datetime
 
 from core import store
 
@@ -16,13 +17,15 @@ DB_PATH = os.path.join(os.path.dirname(__file__), "data", "punch.db")
 
 EVENT_TYPES = {"decision", "milestone", "blocker", "resolution"}
 
-EXTRACT_SYSTEM = """You analyze a project team's chat log and extract the timeline of \
+def _extract_system() -> str:
+    now = datetime.now().strftime("%Y-%m-%d %H:%M %Z")
+    return f"""Today is {now}. You analyze a project team's chat log and extract the timeline of \
 what actually happened. Output ONLY events that matter to a project manager: decisions \
 made, milestones reached, blockers raised, and blockers resolved. Ignore routine chatter.
 
 Return a JSON array. Each event is an object:
-{"date": "YYYY-MM-DD", "type": "decision|milestone|blocker|resolution",
- "summary": "one concise sentence", "channel": "<channel>"}
+{{"date": "YYYY-MM-DD", "type": "decision|milestone|blocker|resolution",
+ "summary": "one concise sentence", "channel": "<channel>"}}
 
 Rules:
 - type MUST be exactly one of: decision, milestone, blocker, resolution.
@@ -71,7 +74,7 @@ def extract_timeline(messages) -> list[dict]:
     from langchain_core.messages import SystemMessage, HumanMessage
     from generation.llm import get_llm
     resp = get_llm().invoke([
-        SystemMessage(content=EXTRACT_SYSTEM),
+        SystemMessage(content=_extract_system()),
         HumanMessage(content=f"Project chat log:\n\n{_messages_block(messages)}"),
     ])
     return _parse_events(resp.content)

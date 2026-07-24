@@ -58,10 +58,11 @@ export async function onRequestPost({ request, env }) {
     .map((m) => `[${(m.timestamp || "").slice(0, 10)}] ${m.author} in #${m.channel}: ${m.content}`)
     .join("\n");
 
+  const now = new Date().toISOString().slice(0, 16).replace("T", " ");
   const sysMsg = {
     role: "system",
     content:
-      "You answer questions about a software/ML project using ONLY the chat log " +
+      `Today is ${now}. You answer questions about a software/ML project using ONLY the chat log ` +
       "below. Cite specifics (people, numbers, decisions). If the log doesn't cover " +
       "it, say so.\n\nChat log:\n" + context,
   };

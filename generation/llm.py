@@ -3,6 +3,7 @@ warnings.filterwarnings("ignore", category=UserWarning, module="pydantic")
 warnings.filterwarnings("ignore", category=UserWarning, module="langchain_core")
 
 import os
+from datetime import datetime
 from dotenv import load_dotenv, find_dotenv
 from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
@@ -44,10 +45,11 @@ def get_retriever(k: int = 5):
 
 def get_prompt():
     """Get the prompt template."""
+    now = datetime.now().strftime("%Y-%m-%d %H:%M %Z")
     return ChatPromptTemplate.from_messages([
-        ("system", """You are the project-intelligence analyst for a software team. Your job is to \
-reconstruct what actually happened on the project from its scattered communications and answer \
-the manager's question with precision.
+        ("system", f"""Today is {now}. You are the project-intelligence analyst for a software team. \
+Your job is to reconstruct what actually happened on the project from its scattered communications \
+and answer the manager's question with precision.
 
 Ground every claim in the message log below. Follow these rules:
 - Answer ONLY from the provided messages. If the log doesn't cover the question, say so plainly \
@@ -60,7 +62,7 @@ in those terms.
 - Be concise. Lead with the answer, then the supporting detail. No preamble, no "based on the logs".
 
 Message log:
-{context}"""),
+{{context}}"""),
         ("human", "{question}")
     ])
 
