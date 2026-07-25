@@ -38,4 +38,4 @@ ENV PORT=8000
 
 EXPOSE 8000
 
-CMD uv run uvicorn server:app --host 0.0.0.0 --port ${PORT}
+CMD /app/.venv/bin/uvicorn server:app --host 0.0.0.0 --port ${PORT}
