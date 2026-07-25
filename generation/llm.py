@@ -84,6 +84,29 @@ def retrieve_context(question: str, k: int = 5):
     
     return docs, context_string
 
+def stream_answer(question: str, history: list[dict] | None = None, api_key: str | None = None):
+    """Like ask_question but yields text chunks for st.write_stream."""
+    docs, context_string = retrieve_context(question)
+    llm = get_llm(api_key)
+
+    if history:
+        from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
+        sys_template = get_prompt().messages[0].prompt.template
+        msgs = [SystemMessage(content=sys_template.replace("{context}", context_string))]
+        for h in history[:-1]:
+            if h["role"] == "user":
+                msgs.append(HumanMessage(content=h["text"]))
+            else:
+                msgs.append(AIMessage(content=h["text"]))
+        msgs.append(HumanMessage(content=question))
+        for chunk in llm.stream(msgs):
+            yield chunk.content
+    else:
+        chain = get_prompt() | llm
+        for chunk in chain.stream({"context": context_string, "question": question}):
+            yield chunk.content
+
+
 def ask_question(question: str, history: list[dict] | None = None, api_key: str | None = None) -> str:
     """Ask a question and get an answer using RAG.
 

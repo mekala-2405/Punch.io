@@ -590,6 +590,7 @@ def render_chat(messages):
         return
 
     from generation import ask_question, retrieve_context
+    from generation.llm import stream_answer
 
     if "chat" not in st.session_state:
         st.session_state.chat = []
@@ -606,8 +607,9 @@ def render_chat(messages):
             with st.spinner("Searching communications…"):
                 history = [{"role": r, "text": c} for r, c in st.session_state.chat[:-1]]
                 docs, _ = retrieve_context(q)
-                answer = ask_question(q, history=history,
-                                      api_key=st.session_state.get("groq_api_key"))
+                answer = st.write_stream(stream_answer(
+                    q, history=history,
+                    api_key=st.session_state.get("groq_api_key")))
                 st.markdown(answer)
                 with st.expander(f"{len(docs)} source messages"):
                     for d in docs:
