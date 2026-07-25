@@ -95,7 +95,7 @@ def ask_question(question: str, history: list[dict] | None = None, api_key: str 
 
     if history:
         from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
-        sys_template = get_prompt().messages[0][1]
+        sys_template = get_prompt().messages[0].prompt.template
         msgs = [SystemMessage(content=sys_template.replace("{context}", context_string))]
         for h in history[:-1]:
             if h["role"] == "user":
